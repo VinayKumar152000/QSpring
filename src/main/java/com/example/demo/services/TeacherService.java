@@ -1,14 +1,18 @@
 package com.example.demo.services;
 
 import java.util.*;
-import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.bo.SubjectBo;
+import com.example.demo.bo.TeacherBo;
+import com.example.demo.bo.UserBo;
 import com.example.demo.domain.Subject;
 import com.example.demo.domain.Teacher;
+import com.example.demo.domain.User;
 import com.example.demo.exceptions.InvalidInfoException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.payload.TeacherPayload;
@@ -23,11 +27,23 @@ public class TeacherService {
 	@Autowired
 	private SubjectRepository subrepo;
 
-	public List<Teacher> getAllTeachers() {
-		return this.repo.findAll();
+	@Autowired
+	private ModelMapper modelMapper;
+
+	public List<TeacherBo> getAllTeachers() {
+
+		List<Teacher> list = this.repo.findAll();
+		List<TeacherBo> listbo = new ArrayList<>();
+
+		for (Teacher teacher : list) {
+			TeacherBo teacherbo = TeachertoTeacherBo(teacher);
+			listbo.add(teacherbo);
+		}
+
+		return listbo;
 	}
 
-	public Teacher getTeacherById(int teacherId) {
+	public TeacherBo getTeacherById(int teacherId) {
 		Optional<Teacher> optional = this.repo.findById(teacherId);
 
 		if (optional.isEmpty()) {
@@ -35,10 +51,11 @@ public class TeacherService {
 		}
 
 		Teacher teacher = optional.get();
-		return teacher;
+		TeacherBo teacherbo = TeachertoTeacherBo(teacher);
+		return teacherbo;
 	}
 
-	public Teacher createTeacher(TeacherPayload teacher) {
+	public TeacherBo createTeacher(TeacherPayload teacher) {
 		Teacher t = new Teacher();
 		String name = teacher.getName();
 		List<String> sub = teacher.getSubjects();
@@ -54,18 +71,23 @@ public class TeacherService {
 //			}
 //		}
 
-		//optimization
-		List<Subject> subjects= this.subrepo.findByNameIn(sub);
-		
+		// optimization
+		List<Subject> subjects = this.subrepo.findByNameIn(sub);
+
 		if (subjects.size() == 0) {
 			throw new InvalidInfoException("Please Enter Valid Subjects Data", HttpStatus.BAD_REQUEST);
 		}
 
 		t.setSubjects(subjects);
-		return this.repo.save(t);
+		this.repo.save(t);
+
+		Teacher teachers = this.repo.findByName(teacher.getName());
+		TeacherBo teacherbo = TeachertoTeacherBo(teachers);
+
+		return teacherbo;
 	}
 
-	public Teacher updateTeacher(TeacherPayload teacher, int teacherId) {
+	public TeacherBo updateTeacher(TeacherPayload teacher, int teacherId) {
 		Optional<Teacher> optional = this.repo.findById(teacherId);
 
 		if (optional.isEmpty()) {
@@ -81,16 +103,18 @@ public class TeacherService {
 		}
 
 		existingTeacher.setName(name);
-		
+
 		List<Subject> subjects = this.subrepo.findByNameIn(sub);
 
 		if (subjects.size() == 0) {
 			throw new InvalidInfoException("Please Enter Valid Subjects Data", HttpStatus.BAD_REQUEST);
 		}
-		
+
 		existingTeacher.setSubjects(subjects);
 
-		return this.repo.save(existingTeacher);
+		this.repo.save(existingTeacher);
+		TeacherBo teacherbo = TeachertoTeacherBo(existingTeacher);
+		return teacherbo;
 
 	}
 
@@ -102,5 +126,10 @@ public class TeacherService {
 		Teacher existingTeacher = optional.get();
 		this.repo.delete(existingTeacher);
 		return;
+	}
+
+	public TeacherBo TeachertoTeacherBo(Teacher teacher) {
+		TeacherBo teacherbo = this.modelMapper.map(teacher, TeacherBo.class);
+		return teacherbo;
 	}
 }

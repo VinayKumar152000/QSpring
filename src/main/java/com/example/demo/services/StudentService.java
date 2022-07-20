@@ -1,13 +1,18 @@
 package com.example.demo.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import java.util.*;
 
+import com.example.demo.bo.StudentBo;
+import com.example.demo.bo.SubjectBo;
+import com.example.demo.bo.UserBo;
 import com.example.demo.domain.Student;
 import com.example.demo.domain.Subject;
 import com.example.demo.domain.Teacher;
+import com.example.demo.domain.User;
 import com.example.demo.exceptions.InvalidInfoException;
 import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.payload.StudentPayload;
@@ -25,11 +30,23 @@ public class StudentService {
 	@Autowired
 	private SubjectRepository subrepo;
 
-	public List<Student> getAllStudents() {
-		return this.repo.findAll();
+	@Autowired
+	private ModelMapper modelMapper;
+
+	public List<StudentBo> getAllStudents() {
+
+		List<Student> list = this.repo.findAll();
+		List<StudentBo> listbo = new ArrayList<>();
+
+		for (Student student : list) {
+			StudentBo studentbo = StudenttoStudentBo(student);
+			listbo.add(studentbo);
+		}
+
+		return listbo;
 	}
 
-	public Student getStudentById(int studentId) {
+	public StudentBo getStudentById(int studentId) {
 		Optional<Student> optional = this.repo.findById(studentId);
 
 		if (optional.isEmpty()) {
@@ -37,10 +54,11 @@ public class StudentService {
 		}
 
 		Student student = optional.get();
-		return student;
+		StudentBo studentbo = StudenttoStudentBo(student);
+		return studentbo;
 	}
 
-	public Student createStudent(StudentPayload student) {
+	public StudentBo createStudent(StudentPayload student) {
 		Student st = new Student();
 
 		String name = student.getName();
@@ -61,10 +79,15 @@ public class StudentService {
 		}
 		st.setSubjects(subjects);
 		st.setTeachers(teachers);
-		return this.repo.save(st);
+		this.repo.save(st);
+
+		Student students = this.repo.findByName(student.getName());
+		StudentBo studentbo = StudenttoStudentBo(students);
+
+		return studentbo;
 	}
 
-	public Student updateStudent(StudentPayload student, int studentId) {
+	public StudentBo updateStudent(StudentPayload student, int studentId) {
 		Optional<Student> optional = this.repo.findById(studentId);
 
 		if (optional.isEmpty()) {
@@ -92,8 +115,10 @@ public class StudentService {
 		existingStudent.setSubjects(subjects);
 		existingStudent.setTeachers(teachers);
 
-		return this.repo.save(existingStudent);
+		this.repo.save(existingStudent);
+		StudentBo studentbo = StudenttoStudentBo(existingStudent);
 
+		return studentbo;
 	}
 
 	public void deleteStudent(int studentId) {
@@ -105,5 +130,10 @@ public class StudentService {
 		Student existingStudent = optional.get();
 		this.repo.delete(existingStudent);
 		return;
+	}
+
+	public StudentBo StudenttoStudentBo(Student student) {
+		StudentBo subjectbo = this.modelMapper.map(student, StudentBo.class);
+		return subjectbo;
 	}
 }

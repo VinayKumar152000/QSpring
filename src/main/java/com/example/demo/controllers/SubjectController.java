@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.bo.SubjectBo;
 import com.example.demo.domain.Subject;
 
 import com.example.demo.services.SubjectService;
@@ -25,22 +26,22 @@ public class SubjectController {
 	SubjectService service;
 
 	@GetMapping
-	public List<Subject> getAllSubjects() {
+	public List<SubjectBo> getAllSubjects() {
 		return service.getAllSubjects();
 	}
 
 	@GetMapping("/{id}")
-	public Subject getSingleSubject(@PathVariable(value = "id") int subjectId){
+	public SubjectBo getSingleSubject(@PathVariable(value = "id") int subjectId){
 		return service.getSubjectById(subjectId);
 	}
 
 	@PostMapping
-	public Subject createSubject(@RequestBody Subject subject) {
+	public SubjectBo createSubject(@RequestBody Subject subject) {
 		return service.createSubject(subject);
 	}
 
 	@PutMapping("/{id}")
-	public Subject updateSubject(@RequestBody Subject subject, @PathVariable("id") int subjectId) {
+	public SubjectBo updateSubject(@RequestBody Subject subject, @PathVariable("id") int subjectId) {
 		return service.updateSubject(subject, subjectId);
 	}
 

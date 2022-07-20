@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.bo.TeacherBo;
 import com.example.demo.domain.Teacher;
 import com.example.demo.payload.TeacherPayload;
 import com.example.demo.services.TeacherService;
@@ -24,22 +25,22 @@ public class TeacherController {
 	TeacherService service;
 
 	@GetMapping
-	public List<Teacher> getAllTeachers() {
+	public List<TeacherBo> getAllTeachers() {
 		return service.getAllTeachers();
 	}
 
 	@GetMapping("/{id}")
-	public Teacher getSingleTeacher(@PathVariable(value = "id") int teacherId) {
+	public TeacherBo getSingleTeacher(@PathVariable(value = "id") int teacherId) {
 		return service.getTeacherById(teacherId);
 	}
 
 	@PostMapping
-	public Teacher createTeacher(@RequestBody TeacherPayload teacher) {
+	public TeacherBo createTeacher(@RequestBody TeacherPayload teacher) {
 		return service.createTeacher(teacher);
 	}
 
 	@PutMapping("/{id}")
-	public Teacher updateTeacher(@RequestBody TeacherPayload teacher, @PathVariable("id") int teacherId) {
+	public TeacherBo updateTeacher(@RequestBody TeacherPayload teacher, @PathVariable("id") int teacherId) {
 		return service.updateTeacher(teacher, teacherId);
 	}
 
