@@ -29,12 +29,3 @@ jobs:
           dockerfile: Dockerfile
           username: vinaykumar1512
           password: dckr_pat_fjQ1PsRp69xxFcl5odkuYWmGr-U
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy To Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: srv-ckke953j89us73bclmrg
-          api-key: rnd_Q7aKu0peeH7aOTFw41l5tAPi2v9W
